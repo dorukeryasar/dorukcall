@@ -1,0 +1,2842 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>DorukCall</title>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{
+font-family:Arial,Helvetica,sans-serif;
+height:100vh;
+overflow:hidden;
+color:#17202a;
+background:#dfe5e7
+}
+button,input{font:inherit}
+button{cursor:pointer;border:0}
+.hidden{display:none!important}
+
+/* AUTH */
+
+#auth{
+height:100vh;
+display:flex;
+align-items:center;
+justify-content:center;
+padding:20px;
+background:
+radial-gradient(circle at 10% 10%,rgba(0,210,165,.25),transparent 35%),
+radial-gradient(circle at 90% 90%,rgba(0,110,90,.3),transparent 35%),
+linear-gradient(135deg,#061d16,#0c3328)
+}
+
+.auth-card{
+width:min(440px,100%);
+background:rgba(255,255,255,.97);
+border-radius:28px;
+padding:34px;
+box-shadow:0 30px 90px rgba(0,0,0,.4)
+}
+
+.logo{
+width:78px;
+height:78px;
+border-radius:24px;
+display:grid;
+place-items:center;
+margin:auto;
+font-size:40px;
+font-weight:900;
+color:white;
+background:linear-gradient(135deg,#00d2a0,#007b66);
+box-shadow:0 15px 30px rgba(0,168,132,.3)
+}
+
+.auth-title{
+text-align:center;
+font-size:30px;
+font-weight:800;
+margin-top:14px
+}
+
+.auth-sub{
+text-align:center;
+color:#667781;
+font-size:14px;
+margin:7px 0 25px
+}
+
+.tabs{
+display:flex;
+background:#eef2f3;
+padding:4px;
+border-radius:14px;
+margin-bottom:20px
+}
+
+.tabs button{
+flex:1;
+padding:11px;
+border-radius:10px;
+background:none;
+color:#667781;
+font-weight:bold
+}
+
+.tabs .active{
+background:white;
+color:#008f72;
+box-shadow:0 2px 10px rgba(0,0,0,.08)
+}
+
+.field{
+width:100%;
+height:48px;
+padding:0 15px;
+border:1px solid #d6dde0;
+border-radius:13px;
+outline:none;
+margin-bottom:11px;
+background:#fafcfc
+}
+
+.field:focus{
+border-color:#00a884;
+box-shadow:0 0 0 3px rgba(0,168,132,.1)
+}
+
+.primary{
+width:100%;
+height:48px;
+border-radius:13px;
+color:white;
+font-weight:800;
+background:linear-gradient(135deg,#00b990,#00866d)
+}
+
+.forgot{
+display:block;
+text-align:center;
+margin:15px 0;
+background:none;
+color:#008f72;
+font-size:14px
+}
+
+.auth-msg{
+min-height:20px;
+text-align:center;
+font-size:13px;
+margin-top:12px
+}
+
+.verify-box{
+background:#f0f8f5;
+border-radius:15px;
+padding:15px;
+margin-top:15px;
+font-size:13px;
+color:#31574f
+}
+
+.verify-box button{
+margin-top:9px;
+background:none;
+color:#008f72;
+font-weight:bold
+}
+
+/* APP */
+
+#app{
+height:100vh;
+display:flex;
+background:#dfe5e7
+}
+
+#sidebar{
+width:370px;
+min-width:300px;
+background:white;
+border-right:1px solid #d9dfe2;
+display:flex;
+flex-direction:column
+}
+
+.sidebar-top{
+padding:12px 15px;
+background:#f0f2f5
+}
+
+.my-profile{
+display:flex;
+align-items:center;
+gap:11px;
+margin-bottom:10px
+}
+
+.avatar{
+width:48px;
+height:48px;
+border-radius:50%;
+display:grid;
+place-items:center;
+background:linear-gradient(135deg,#00b894,#007d68);
+color:white;
+font-weight:800;
+overflow:hidden;
+flex-shrink:0
+}
+
+.avatar img{
+width:100%;
+height:100%;
+object-fit:cover
+}
+
+.my-name{
+flex:1;
+font-weight:bold
+}
+
+.icon-btn{
+width:42px;
+height:42px;
+border-radius:50%;
+background:none;
+color:#54656f;
+font-size:21px
+}
+
+.search{
+height:42px;
+display:flex;
+align-items:center;
+gap:8px;
+padding:0 12px;
+background:white;
+border-radius:12px
+}
+
+.search input{
+border:0;
+outline:0;
+width:100%
+}
+
+#list{
+overflow:auto;
+flex:1
+}
+
+.item{
+display:flex;
+gap:12px;
+align-items:center;
+padding:12px 15px;
+border-bottom:1px solid #f0f1f2
+}
+
+.item:hover,.item.active{
+background:#e9edef
+}
+
+.item-info{
+min-width:0;
+flex:1
+}
+
+.item-name{
+font-weight:bold;
+white-space:nowrap;
+overflow:hidden;
+text-overflow:ellipsis
+}
+
+.item-sub{
+font-size:12px;
+color:#667781;
+margin-top:3px
+}
+
+.group-avatar{
+background:linear-gradient(135deg,#6c5ce7,#4834d4)
+}
+
+/* CHAT */
+
+#chat{
+flex:1;
+min-width:0;
+display:flex;
+flex-direction:column;
+background:#efeae2;
+position:relative
+}
+
+#welcome{
+flex:1;
+display:grid;
+place-items:center;
+text-align:center;
+color:#667781;
+background:
+radial-gradient(circle at 20px 20px,rgba(0,0,0,.035) 2px,transparent 2px) 0 0/40px 40px,
+#efeae2
+}
+
+#welcome div{max-width:450px;padding:30px}
+#welcome-icon{font-size:70px;margin-bottom:15px}
+
+#header{
+height:64px;
+display:none;
+align-items:center;
+gap:10px;
+padding:8px 13px;
+background:#f0f2f5;
+border-bottom:1px solid #d8dde0;
+z-index:5
+}
+
+#header-name{
+flex:1;
+font-weight:bold
+}
+
+#header-status{
+font-size:12px;
+color:#667781;
+margin-top:3px
+}
+
+#messages{
+flex:1;
+overflow:auto;
+padding:22px 7%;
+background-color:#efeae2;
+background-image:
+radial-gradient(circle at 15px 15px,rgba(0,0,0,.035) 1.5px,transparent 1.5px),
+radial-gradient(circle at 30px 30px,rgba(0,0,0,.025) 1px,transparent 1px);
+background-size:45px 45px,60px 60px
+}
+
+.row{
+display:flex;
+margin-bottom:6px
+}
+
+.row.me{justify-content:flex-end}
+
+.bubble{
+max-width:min(70%,600px);
+padding:8px 10px;
+border-radius:9px;
+box-shadow:0 1px 1px rgba(0,0,0,.08);
+word-break:break-word
+}
+
+.me .bubble{
+background:#d9fdd3;
+border-top-right-radius:3px
+}
+
+.you .bubble{
+background:white;
+border-top-left-radius:3px
+}
+
+.time{
+display:block;
+text-align:right;
+font-size:10px;
+color:#667781;
+margin-top:3px
+}
+
+.message-image{
+max-width:300px;
+max-height:350px;
+border-radius:9px;
+display:block
+}
+
+.audio{
+width:260px;
+max-width:100%
+}
+
+.file{
+padding:11px;
+background:rgba(0,0,0,.04);
+border-radius:10px
+}
+
+.file a{
+color:#008f72;
+font-weight:bold;
+text-decoration:none
+}
+
+#composer{
+display:none;
+padding:8px 11px;
+gap:8px;
+align-items:center;
+background:#f0f2f5
+}
+
+#message{
+height:44px;
+flex:1;
+border:0;
+outline:0;
+border-radius:12px;
+padding:0 14px
+}
+
+.send{
+width:44px;
+height:44px;
+border-radius:50%;
+background:#00a884;
+color:white
+}
+
+#attachMenu{
+position:absolute;
+bottom:65px;
+left:12px;
+width:215px;
+padding:8px;
+background:white;
+border-radius:15px;
+box-shadow:0 12px 35px rgba(0,0,0,.2);
+z-index:20
+}
+
+.attach{
+width:100%;
+background:white;
+padding:11px;
+text-align:left;
+border-radius:9px
+}
+
+.attach:hover{background:#f1f3f4}
+
+/* MENUS */
+
+.popup{
+position:absolute;
+right:15px;
+top:58px;
+width:245px;
+padding:8px;
+background:white;
+border-radius:15px;
+box-shadow:0 12px 40px rgba(0,0,0,.2);
+z-index:30
+}
+
+.popup button{
+width:100%;
+background:white;
+padding:11px;
+text-align:left;
+border-radius:9px
+}
+
+.popup button:hover{background:#f1f3f4}
+
+.profile-editor{
+padding:10px
+}
+
+.profile-editor input{
+width:100%;
+height:43px;
+border:1px solid #ddd;
+border-radius:10px;
+padding:0 10px;
+margin:6px 0
+}
+
+.profile-editor button{
+background:#00a884;
+color:white;
+text-align:center;
+font-weight:bold
+}
+
+/* BACKGROUND */
+
+.bg-grid{
+display:grid;
+grid-template-columns:repeat(4,1fr);
+gap:6px;
+padding:10px
+}
+
+.bg{
+height:45px;
+border-radius:9px;
+border:2px solid transparent
+}
+
+/* CALL */
+
+#call{
+position:fixed;
+inset:0;
+background:#101010;
+z-index:100;
+display:none;
+align-items:center;
+justify-content:center
+}
+
+#remote{
+position:absolute;
+inset:0;
+width:100%;
+height:100%;
+object-fit:cover;
+background:#161616
+}
+
+#local{
+position:absolute;
+right:20px;
+top:20px;
+width:190px;
+aspect-ratio:4/3;
+object-fit:cover;
+border-radius:15px;
+border:2px solid white;
+background:#222
+}
+
+.call-title{
+position:absolute;
+top:20px;
+left:50%;
+transform:translateX(-50%);
+z-index:4;
+color:white;
+text-align:center
+}
+
+.call-buttons{
+position:absolute;
+bottom:35px;
+left:50%;
+transform:translateX(-50%);
+display:flex;
+gap:14px;
+z-index:5
+}
+
+.call-button{
+width:56px;
+height:56px;
+border-radius:50%;
+background:rgba(255,255,255,.18);
+color:white;
+font-size:21px
+}
+
+.call-end{background:#e53935}
+
+#incoming{
+position:fixed;
+right:20px;
+top:20px;
+z-index:200;
+width:330px;
+padding:17px;
+border-radius:18px;
+background:#1f2c34;
+color:white;
+display:none;
+box-shadow:0 15px 50px rgba(0,0,0,.35)
+}
+
+.incoming-buttons{
+display:flex;
+gap:8px;
+margin-top:15px
+}
+
+.incoming-buttons button{
+flex:1;
+padding:10px;
+border-radius:9px;
+color:white;
+font-weight:bold
+}
+
+/* MOBILE */
+
+.mobile-back{display:none}
+
+@media(max-width:760px){
+#sidebar{
+width:100%;
+min-width:0
+}
+
+#chat{
+display:none
+}
+
+#app.chat-open #sidebar{display:none}
+#app.chat-open #chat{display:flex}
+
+.mobile-back{display:block}
+
+#messages{padding:18px 4%}
+
+.bubble{max-width:85%}
+
+#local{
+width:120px
+}
+}
+</style>
+</head>
+
+<body>
+
+<!-- ================= AUTH ================= -->
+
+<section id="auth">
+
+<div class="auth-card">
+
+<div class="logo">D</div>
+
+<div class="auth-title">DorukCall</div>
+
+<div class="auth-sub">
+Mesajlaş, ara, dosya gönder ve arkadaşlarınla iletişimde kal.
+</div>
+
+<div class="tabs">
+<button id="loginTab" class="active" onclick="authMode('login')">
+Giriş Yap
+</button>
+<button id="registerTab" onclick="authMode('register')">
+Kayıt Ol
+</button>
+</div>
+
+<input id="username" class="field hidden" placeholder="Kullanıcı adın">
+
+<input id="email" class="field" type="email"
+placeholder="E-posta adresin">
+
+<input id="password" class="field" type="password"
+placeholder="Şifren">
+
+<button id="authButton" class="primary" onclick="authAction()">
+Giriş Yap
+</button>
+
+<button class="forgot" onclick="showForgot()">
+Şifremi Unuttum
+</button>
+
+<div id="authMessage" class="auth-msg"></div>
+
+<div id="verifyBox" class="verify-box hidden">
+<strong>E-posta doğrulaması</strong>
+<p style="margin-top:6px">
+Hesabını etkinleştirmek için e-postandaki bağlantıya tıkla.
+</p>
+
+<button id="resendButton" onclick="resendVerification()">
+Doğrulama e-postasını yeniden gönder
+</button>
+
+<div id="resendTimer"></div>
+</div>
+
+<div id="forgotBox" class="verify-box hidden">
+
+<strong>Şifre yenileme</strong>
+
+<p style="margin-top:6px">
+E-posta adresini yaz. Sana şifre yenileme bağlantısı gönderelim.
+</p>
+
+<input id="resetEmail" class="field"
+style="margin-top:10px"
+type="email"
+placeholder="E-posta adresin">
+
+<button onclick="sendResetEmail()"
+style="background:#00a884;color:white;padding:10px 14px;border-radius:9px">
+Şifre yenileme bağlantısı gönder
+</button>
+
+<div id="resetTimer"></div>
+
+</div>
+
+</div>
+</section>
+
+
+<!-- ================= APP ================= -->
+
+<section id="app" class="hidden">
+
+<aside id="sidebar">
+
+<div class="sidebar-top">
+
+<div class="my-profile">
+
+<div class="avatar" id="myAvatar">D</div>
+
+<div class="my-name" id="myName">
+Doruk
+</div>
+
+<button class="icon-btn"
+onclick="openProfile()">
+⚙️
+</button>
+
+<button class="icon-btn"
+onclick="logout()">
+⎋
+</button>
+
+</div>
+
+<div class="search">
+🔎
+<input id="search"
+placeholder="Kişi veya grup ara..."
+oninput="searchAll()">
+</div>
+
+</div>
+
+<div id="list"></div>
+
+</aside>
+
+
+<main id="chat">
+
+<div id="welcome">
+<div>
+<div id="welcome-icon">💬</div>
+<h2>DorukCall</h2>
+<p style="margin-top:8px">
+Bir kişi veya grup seçerek sohbete başlayabilirsin.
+</p>
+</div>
+</div>
+
+
+<header id="header">
+
+<button class="icon-btn mobile-back"
+onclick="closeChat()">‹</button>
+
+<div class="avatar" id="headerAvatar">D</div>
+
+<div id="header-name">
+Kullanıcı
+<div id="header-status">DorukCall</div>
+</div>
+
+<button class="icon-btn"
+onclick="callSelected(false)">
+📞
+</button>
+
+<button class="icon-btn"
+onclick="callSelected(true)">
+📹
+</button>
+
+<button class="icon-btn"
+onclick="chatSettings()">
+⋮
+</button>
+
+</header>
+
+
+<div id="messages" class="hidden"></div>
+
+
+<div id="composer">
+
+<button class="icon-btn"
+onclick="toggleAttach()">
+＋
+</button>
+
+<input id="message"
+placeholder="Mesaj yaz..."
+onkeydown="messageKey(event)">
+
+<button class="send"
+onclick="sendText()">
+➤
+</button>
+
+</div>
+
+
+<div id="attachMenu" class="hidden">
+
+<button class="attach"
+onclick="selectFile('image/*')">
+🖼️ Fotoğraf
+</button>
+
+<button class="attach"
+onclick="selectFile('video/*')">
+🎬 Video
+</button>
+
+<button class="attach"
+onclick="selectFile('audio/*')">
+🎵 Müzik / Ses
+</button>
+
+<button class="attach"
+onclick="selectFile('*/*')">
+📁 Dosya
+</button>
+
+<button class="attach"
+onclick="openCamera()">
+📷 Kamera
+</button>
+
+<button class="attach"
+onclick="recordAudio()">
+🎙️ Ses kaydı
+</button>
+
+<input id="file"
+type="file"
+class="hidden"
+onchange="uploadFile(this.files[0])">
+
+</div>
+
+
+<div id="settings" class="popup hidden">
+
+<button onclick="openBackgrounds()">
+🎨 Sohbet arka planı
+</button>
+
+<button onclick="openContactName()">
+✏️ Bu kişinin bende görünen adını değiştir
+</button>
+
+<div id="backgrounds" class="hidden">
+
+<div class="bg-grid">
+
+<button class="bg"
+style="background:#efeae2"
+onclick="setBackground('#efeae2')"></button>
+
+<button class="bg"
+style="background:#dcefff"
+onclick="setBackground('#dcefff')"></button>
+
+<button class="bg"
+style="background:#f5e2ff"
+onclick="setBackground('#f5e2ff')"></button>
+
+<button class="bg"
+style="background:#e1f7e8"
+onclick="setBackground('#e1f7e8')"></button>
+
+<button class="bg"
+style="background:#fff0d9"
+onclick="setBackground('#fff0d9')"></button>
+
+<button class="bg"
+style="background:#202b33"
+onclick="setBackground('#202b33')"></button>
+
+<button class="bg"
+style="background:linear-gradient(135deg,#8ec5fc,#e0c3fc)"
+onclick="setBackground('linear-gradient(135deg,#8ec5fc,#e0c3fc)')"></button>
+
+<button class="bg"
+style="background:linear-gradient(135deg,#43e97b,#38f9d7)"
+onclick="setBackground('linear-gradient(135deg,#43e97b,#38f9d7)')"></button>
+
+</div>
+
+</div>
+
+</div>
+
+</main>
+</section>
+
+
+<!-- PROFILE -->
+
+<div id="profilePopup" class="popup hidden"
+style="right:20px;top:70px;width:300px">
+
+<div class="profile-editor">
+
+<h3>Profilini düzenle</h3>
+
+<div style="text-align:center;margin:14px">
+
+<div class="avatar"
+id="profileAvatar"
+style="width:80px;height:80px;margin:auto;font-size:25px">
+D
+</div>
+
+</div>
+
+<input id="newUsername"
+placeholder="Yeni kullanıcı adı">
+
+<input id="avatarFile"
+type="file"
+accept="image/*">
+
+<button onclick="saveProfile()">
+Kaydet
+</button>
+
+</div>
+
+</div>
+
+
+<!-- CAMERA -->
+
+<div id="camera"
+style="
+display:none;
+position:fixed;
+inset:0;
+background:#000;
+z-index:150;
+align-items:center;
+justify-content:center;
+flex-direction:column;
+padding:20px">
+
+<video id="cameraVideo"
+autoplay
+playsinline
+style="max-width:100%;max-height:75vh;border-radius:18px">
+</video>
+
+<div style="margin-top:15px;display:flex;gap:12px">
+
+<button onclick="takePicture()"
+style="width:60px;height:60px;border-radius:50%;background:#00a884;color:white;font-size:23px">
+📸
+</button>
+
+<button onclick="closeCamera()"
+style="width:60px;height:60px;border-radius:50%;background:#e53935;color:white;font-size:20px">
+✕
+</button>
+
+</div>
+</div>
+
+
+<!-- CALL -->
+
+<div id="call">
+
+<div class="call-title">
+<strong id="callName">DorukCall</strong>
+<div id="callStatus">Bağlanıyor...</div>
+</div>
+
+<video id="remote"
+autoplay
+playsinline>
+</video>
+
+<video id="local"
+autoplay
+muted
+playsinline>
+</video>
+
+<div class="call-buttons">
+
+<button class="call-button"
+onclick="toggleMic()">
+🎙️
+</button>
+
+<button id="cameraCallButton"
+class="call-button"
+onclick="toggleCamera()">
+📹
+</button>
+
+<button class="call-button call-end"
+onclick="endCall()">
+📞
+</button>
+
+</div>
+</div>
+
+
+<!-- INCOMING CALL -->
+
+<div id="incoming">
+
+<strong id="incomingUser">
+Gelen arama
+</strong>
+
+<div id="incomingType"
+style="margin-top:5px;color:#ccd6da">
+Görüntülü arama
+</div>
+
+<div class="incoming-buttons">
+
+<button
+style="background:#16a085"
+onclick="answerCall()">
+Cevapla
+</button>
+
+<button
+style="background:#c0392b"
+onclick="rejectCall()">
+Reddet
+</button>
+
+</div>
+</div>
+
+
+<script>
+
+/* =====================================================
+SUPABASE
+===================================================== */
+
+const SUPABASE_URL =
+"https://xdpizbybmatsmzovrxqr.supabase.co";
+
+/*
+BURAYA SADECE:
+
+sb_publishable_...
+
+ANAHTARINI KOY.
+*/
+
+const SUPABASE_KEY =
+"sb_publishable_XYAc2ayZ9s2HAGzJ0e2XFw_YKRi-tdO";
+
+const db =
+window.supabase.createClient(
+SUPABASE_URL,
+SUPABASE_KEY
+);
+
+
+/* =====================================================
+GLOBAL
+===================================================== */
+
+let user=null;
+let profile=null;
+let selected=null;
+let users=[];
+let groups=[];
+
+let messageChannel=null;
+let callChannel=null;
+
+let peer=null;
+let localStream=null;
+let remoteStream=null;
+
+let incomingOffer=null;
+let incomingCaller=null;
+let incomingVideo=false;
+
+
+/* =====================================================
+AUTH MODE
+===================================================== */
+
+function authMode(mode){
+
+const register=mode==="register";
+
+document.getElementById("loginTab")
+.classList.toggle("active",!register);
+
+document.getElementById("registerTab")
+.classList.toggle("active",register);
+
+document.getElementById("username")
+.classList.toggle("hidden",!register);
+
+document.getElementById("authButton").textContent=
+register?"Hesap Oluştur":"Giriş Yap";
+
+document.getElementById("verifyBox")
+.classList.add("hidden");
+
+}
+
+
+/* =====================================================
+AUTH
+===================================================== */
+
+async function authAction(){
+
+const register=
+document.getElementById("registerTab")
+.classList.contains("active");
+
+const email=
+document.getElementById("email").value.trim();
+
+const password=
+document.getElementById("password").value;
+
+const username=
+document.getElementById("username").value.trim();
+
+if(!email||!password||(register&&!username)){
+setAuth("Alanları doldur.",true);
+return;
+}
+
+try{
+
+if(register){
+
+const {data,error}=
+await db.auth.signUp({
+
+email,
+password,
+
+options:{
+emailRedirectTo:
+window.location.origin,
+
+data:{
+username
+}
+}
+
+});
+
+if(error)throw error;
+
+if(data.session){
+
+await createProfile(
+data.user,
+username
+);
+
+}else{
+
+setAuth(
+"E-posta adresine doğrulama bağlantısı gönderildi."
+);
+
+showVerify(email);
+
+}
+
+}else{
+
+const {data,error}=
+await db.auth.signInWithPassword({
+email,
+password
+});
+
+if(error)throw error;
+
+await start(data.user);
+
+}
+
+}catch(e){
+
+setAuth(e.message,true);
+
+}
+
+}
+
+
+function setAuth(text,error=false){
+
+const el=
+document.getElementById("authMessage");
+
+el.textContent=text;
+
+el.style.color=
+error?"#d32f2f":"#008f72";
+
+}
+
+
+/* =====================================================
+VERIFY RESEND
+===================================================== */
+
+function showVerify(email){
+
+document.getElementById("verifyBox")
+.classList.remove("hidden");
+
+startCountdown(
+"verifyTimer",
+"resendButton",
+60
+);
+
+}
+
+
+async function resendVerification(){
+
+const email=
+document.getElementById("email").value.trim();
+
+if(!email)return;
+
+const {error}=
+await db.auth.resend({
+type:"signup",
+email
+});
+
+if(error){
+setAuth(error.message,true);
+return;
+}
+
+setAuth("Doğrulama e-postası yeniden gönderildi.");
+
+startCountdown(
+"verifyTimer",
+"resendButton",
+60
+);
+
+}
+
+
+/* =====================================================
+FORGOT PASSWORD
+===================================================== */
+
+function showForgot(){
+
+document.getElementById("forgotBox")
+.classList.toggle("hidden");
+
+document.getElementById("verifyBox")
+.classList.add("hidden");
+
+}
+
+
+async function sendResetEmail(){
+
+const email=
+document.getElementById("resetEmail")
+.value.trim();
+
+if(!email){
+
+setAuth("E-posta adresini yaz.",true);
+return;
+
+}
+
+const {error}=
+await db.auth.resetPasswordForEmail(
+email,
+{
+redirectTo:
+window.location.origin
+}
+);
+
+if(error){
+
+setAuth(error.message,true);
+return;
+
+}
+
+setAuth(
+"Şifre yenileme bağlantısı e-postana gönderildi."
+);
+
+startCountdown(
+"resetTimer",
+null,
+60
+);
+
+}
+
+
+/* =====================================================
+COUNTDOWN
+===================================================== */
+
+function startCountdown(id,buttonId,seconds){
+
+let left=seconds;
+
+const timer=
+document.getElementById(id);
+
+const button=
+buttonId?
+document.getElementById(buttonId):
+null;
+
+if(button){
+button.disabled=true;
+button.style.opacity=".5";
+}
+
+timer.textContent=
+` Yeniden göndermek için ${left} saniye bekle.`;
+
+const interval=setInterval(()=>{
+
+left--;
+
+timer.textContent=
+` Yeniden göndermek için ${left} saniye bekle.`;
+
+if(left<=0){
+
+clearInterval(interval);
+
+timer.textContent="";
+
+if(button){
+
+button.disabled=false;
+button.style.opacity="1";
+
+}
+
+}
+
+},1000);
+
+}
+
+
+/* =====================================================
+INIT
+===================================================== */
+
+async function init(){
+
+const {data:{session}}=
+await db.auth.getSession();
+
+if(session){
+
+await start(session.user);
+
+}
+
+db.auth.onAuthStateChange(
+async(event,session)=>{
+
+if(event==="SIGNED_IN"&&session){
+
+if(!appStarted || !user || user.id!==session.user.id){
+appStarted=true;
+await start(session.user);
+}
+
+}
+
+});
+
+}
+
+init();
+
+
+/* =====================================================
+START
+===================================================== */
+
+async function start(u){
+
+user=u;
+
+await ensureProfile();
+
+document.getElementById("auth")
+.classList.add("hidden");
+
+document.getElementById("app")
+.classList.remove("hidden");
+
+updateMyProfile();
+
+await loadUsers();
+
+subscribeMessages();
+
+setupCalls();
+
+}
+
+
+/* =====================================================
+PROFILE
+===================================================== */
+
+async function createProfile(u,name){
+
+if(!u || !u.id) throw new Error("Geçersiz kullanıcı.");
+
+const cleanName=
+(String(name||"").trim()) ||
+(u.email ? u.email.split("@")[0] : "Kullanıcı");
+
+const {error}=await db.from("profiles").upsert({
+id:u.id,
+username:cleanName,
+email:u.email || ""
+});
+
+if(error) throw error;
+}
+
+
+async function ensureProfile(){
+
+if(!user || !user.id){
+throw new Error("Oturum açılmış bir kullanıcı bulunamadı.");
+}
+
+let {data:p,error}=await db
+.from("profiles")
+.select("*")
+.eq("id",user.id)
+.maybeSingle();
+
+if(error) throw error;
+
+if(!p){
+
+const username =
+(user.user_metadata?.username || "").trim() ||
+(user.email ? user.email.split("@")[0] : "").trim() ||
+"Kullanıcı";
+
+const {data:created,error:createError}=await db
+.from("profiles")
+.insert({
+id:user.id,
+username,
+email:user.email || ""
+})
+.select("*")
+.single();
+
+if(createError) throw createError;
+
+p=created;
+}
+
+profile=p;
+}
+
+
+function updateMyProfile(){
+
+document.getElementById("myName")
+.textContent=profile.username;
+
+document.getElementById("myAvatar")
+.innerHTML=
+profile.avatar_url?
+`<img src="${profile.avatar_url}">`:
+escapeHtml(profile.username[0].toUpperCase());
+
+}
+
+
+/* =====================================================
+EDIT PROFILE
+===================================================== */
+
+function openProfile(){
+
+document.getElementById("profilePopup")
+.classList.toggle("hidden");
+
+document.getElementById("newUsername")
+.value=profile.username;
+
+document.getElementById("profileAvatar")
+.innerHTML=
+profile.avatar_url?
+`<img src="${profile.avatar_url}">`:
+profile.username[0].toUpperCase();
+
+}
+
+
+async function saveProfile(){
+
+const name=document.getElementById("newUsername").value.trim();
+const file=document.getElementById("avatarFile").files[0];
+
+if(!user || !user.id){
+alert("Oturum bulunamadı. Lütfen tekrar giriş yap.");
+return;
+}
+
+if(name && name.length < 2){
+alert("Kullanıcı adı en az 2 karakter olmalı.");
+return;
+}
+
+try{
+
+let avatar=profile?.avatar_url || null;
+
+if(file){
+
+const ext=(file.name.split(".").pop() || "jpg").toLowerCase();
+const path="avatars/"+user.id+"_"+Date.now()+"."+ext;
+
+const {error:uploadError}=await db.storage
+.from("chat-files")
+.upload(path,file,{
+upsert:true,
+contentType:file.type || "image/jpeg"
+});
+
+if(uploadError) throw uploadError;
+
+avatar=db.storage
+.from("chat-files")
+.getPublicUrl(path)
+.data.publicUrl+"?v="+Date.now();
+}
+
+const {data:updated,error:updateError}=await db
+.from("profiles")
+.update({
+username:name || profile.username,
+avatar_url:avatar
+})
+.eq("id",user.id)
+.select("*")
+.single();
+
+if(updateError) throw updateError;
+
+profile=updated;
+updateMyProfile();
+
+document.getElementById("profileAvatar").innerHTML=
+profile.avatar_url
+? `<img src="${escapeHtml(profile.avatar_url)}">`
+: escapeHtml((profile.username || "K")[0].toUpperCase());
+
+document.getElementById("profilePopup").classList.add("hidden");
+document.getElementById("avatarFile").value="";
+
+await loadUsers();
+
+alert("Profil başarıyla güncellendi.");
+
+}catch(e){
+console.error(e);
+alert("Profil güncellenemedi: "+(e.message || e));
+}
+
+}
+
+
+/* =====================================================
+USERS + GROUPS
+===================================================== */
+
+async function loadUsers(){
+
+const {data}=await db
+.from("profiles")
+.select("*")
+.neq("id",user.id)
+.order("username");
+
+users=data||[];
+
+const {data:groupData}=await db
+.from("groups")
+.select("*")
+.order("name");
+
+groups=groupData||[];
+
+renderList(users,groups);
+
+}
+
+
+function renderList(us,gs){
+
+const list=document.getElementById("list");
+
+let html="";
+
+gs.forEach(g=>{
+
+html+=`
+<div class="item"
+onclick="openGroup('${g.id}')">
+
+<div class="avatar group-avatar">
+👥
+</div>
+
+<div class="item-info">
+<div class="item-name">
+${escapeHtml(g.name)}
+</div>
+
+<div class="item-sub">
+Grup
+</div>
+</div>
+
+</div>
+`;
+
+});
+
+
+us.forEach(u=>{
+
+const custom=
+localStorage.getItem("doruk_name_"+u.id);
+
+html+=`
+<div class="item"
+onclick="openUser('${u.id}')">
+
+<div class="avatar">
+
+${u.avatar_url?
+`<img src="${u.avatar_url}">`:
+escapeHtml((custom||u.username)[0].toUpperCase())}
+
+</div>
+
+<div class="item-info">
+
+<div class="item-name">
+${escapeHtml(custom||u.username)}
+</div>
+
+<div class="item-sub">
+${escapeHtml(u.email||"DorukCall")}
+</div>
+
+</div>
+
+</div>
+`;
+
+});
+
+list.innerHTML=
+html||
+`<div style="padding:30px;text-align:center;color:#667781">
+Henüz kişi veya grup yok.
+</div>`;
+
+}
+
+
+/* =====================================================
+SEARCH
+===================================================== */
+
+function searchAll(){
+
+const q=
+document.getElementById("search")
+.value.toLowerCase();
+
+renderList(
+
+users.filter(x=>
+(x.username||"").toLowerCase().includes(q)||
+(x.email||"").toLowerCase().includes(q)
+),
+
+groups.filter(x=>
+(x.name||"").toLowerCase().includes(q)
+)
+
+);
+
+}
+
+
+/* =====================================================
+OPEN USER
+===================================================== */
+
+async function openUser(id){
+
+selected={
+type:"user",
+data:users.find(x=>x.id===id)
+};
+
+if(!selected.data)return;
+
+document.getElementById("app")
+.classList.add("chat-open");
+
+document.getElementById("welcome")
+.classList.add("hidden");
+
+document.getElementById("header")
+.style.display="flex";
+
+document.getElementById("messages")
+.classList.remove("hidden");
+
+document.getElementById("composer")
+.style.display="flex";
+
+const p=selected.data;
+
+const custom=
+localStorage.getItem("doruk_name_"+p.id);
+
+document.getElementById("header-name")
+firstChild;
+
+document.getElementById("header-name")
+.innerHTML=
+`${escapeHtml(custom||p.username)}
+<div id="header-status">DorukCall kullanıcısı</div>`;
+
+document.getElementById("headerAvatar").innerHTML=
+p.avatar_url?
+`<img src="${p.avatar_url}">`:
+escapeHtml((custom||p.username)[0].toUpperCase());
+
+applyBackground();
+
+await loadUserMessages();
+
+}
+
+
+/* =====================================================
+CHANGE CONTACT NAME
+===================================================== */
+
+function openContactName(){
+
+if(!selected||selected.type!=="user")return;
+
+const p=selected.data;
+
+const current=
+localStorage.getItem("doruk_name_"+p.id)||
+p.username;
+
+const newName=
+prompt("Bu kişinin sende görünecek adı:",current);
+
+if(newName===null)return;
+
+if(newName.trim()){
+
+localStorage.setItem(
+"doruk_name_"+p.id,
+newName.trim()
+);
+
+}
+
+document.getElementById("settings")
+.classList.add("hidden");
+
+loadUsers();
+
+openUser(p.id);
+
+}
+
+
+/* =====================================================
+MESSAGES
+===================================================== */
+
+async function loadUserMessages(){
+
+const p=selected.data;
+
+const {data,error}=await db
+.from("messages")
+.select("*")
+.or(
+`and(sender_id.eq.${user.id},receiver_id.eq.${p.id}),and(sender_id.eq.${p.id},receiver_id.eq.${user.id})`
+)
+.order("created_at");
+
+if(error){
+
+console.error(error);
+return;
+
+}
+
+renderMessages(data||[]);
+
+}
+
+
+function renderMessages(arr){
+
+const box=
+document.getElementById("messages");
+
+box.innerHTML=
+arr.map(m=>{
+
+const me=m.sender_id===user.id;
+
+let content="";
+
+if(m.file_url){
+
+if((m.file_type||"").startsWith("image/")){
+
+content+=`
+<img class="message-image"
+src="${m.file_url}">
+`;
+
+}else if((m.file_type||"").startsWith("audio/")){
+
+content+=`
+<audio class="audio"
+controls
+src="${m.file_url}">
+</audio>
+`;
+
+}else if((m.file_type||"").startsWith("video/")){
+
+content+=`
+<video controls
+style="max-width:300px;border-radius:10px"
+src="${m.file_url}">
+</video>
+`;
+
+}else{
+
+content+=`
+<div class="file">
+📎
+<a href="${m.file_url}" target="_blank">
+${escapeHtml(m.file_name||"Dosya")}
+</a>
+</div>
+`;
+
+}
+
+}
+
+if(m.content)
+content+=escapeHtml(m.content);
+
+const time=
+new Date(m.created_at)
+.toLocaleTimeString("tr-TR",{
+hour:"2-digit",
+minute:"2-digit"
+});
+
+return`
+<div class="row ${me?"me":"you"}">
+<div class="bubble">
+${content}
+<span class="time">${time}</span>
+</div>
+</div>
+`;
+
+}).join("");
+
+box.scrollTop=box.scrollHeight;
+
+}
+
+
+/* =====================================================
+SEND TEXT
+===================================================== */
+
+async function sendText(){
+
+if(!selected||selected.type!=="user")return;
+
+const input=document.getElementById("message");
+
+const text=input.value.trim();
+
+if(!text)return;
+
+const {error}=await db
+.from("messages")
+.insert({
+
+sender_id:user.id,
+receiver_id:selected.data.id,
+content:text
+
+});
+
+if(error){
+
+alert(error.message);
+return;
+
+}
+
+input.value="";
+
+}
+
+
+function messageKey(e){
+
+if(e.key==="Enter"&&!e.shiftKey){
+
+e.preventDefault();
+sendText();
+
+}
+
+}
+
+
+/* =====================================================
+REALTIME
+===================================================== */
+
+function subscribeMessages(){
+
+messageChannel=
+db.channel("dorukcall-messages")
+
+.on(
+"postgres_changes",
+{
+event:"INSERT",
+schema:"public",
+table:"messages"
+},
+async payload=>{
+
+const m=payload.new;
+
+if(!selected||selected.type!=="user")return;
+
+if(
+(m.sender_id===user.id&&
+m.receiver_id===selected.data.id)||
+(m.sender_id===selected.data.id&&
+m.receiver_id===user.id)
+){
+
+await loadUserMessages();
+
+}
+
+}
+)
+.subscribe();
+
+}
+
+
+/* =====================================================
+FILES
+===================================================== */
+
+function toggleAttach(){
+
+document.getElementById("attachMenu")
+.classList.toggle("hidden");
+
+}
+
+function selectFile(type){
+
+const input=document.getElementById("file");
+
+input.accept=type;
+input.click();
+
+}
+
+
+async function uploadFile(file){
+
+if(!file||!selected||selected.type!=="user")
+return;
+
+document.getElementById("attachMenu")
+.classList.add("hidden");
+
+const path=
+user.id+"/"+Date.now()+"_"+clean(file.name);
+
+const {error}=await db.storage
+.from("chat-files")
+.upload(path,file);
+
+if(error){
+
+alert(error.message);
+return;
+
+}
+
+const url=
+db.storage
+.from("chat-files")
+.getPublicUrl(path)
+.data.publicUrl;
+
+await db.from("messages").insert({
+
+sender_id:user.id,
+receiver_id:selected.data.id,
+
+file_url:url,
+file_name:file.name,
+file_type:file.type
+
+});
+
+}
+
+
+/* =====================================================
+AUDIO RECORD
+===================================================== */
+
+async function recordAudio(){
+
+if(!selected)return;
+
+try{
+
+const stream=
+await navigator.mediaDevices
+.getUserMedia({audio:true});
+
+const recorder=
+new MediaRecorder(stream);
+
+const chunks=[];
+
+recorder.ondataavailable=e=>{
+if(e.data.size)chunks.push(e.data);
+};
+
+recorder.onstop=async()=>{
+
+stream.getTracks()
+.forEach(t=>t.stop());
+
+const blob=
+new Blob(chunks,{type:"audio/webm"});
+
+const file=
+new File(
+[blob],
+"ses-"+Date.now()+".webm",
+{type:"audio/webm"}
+);
+
+await uploadFile(file);
+
+};
+
+recorder.start();
+
+alert(
+"Ses kaydı başladı. Durdurmak için Tamam'a bas."
+);
+
+recorder.stop();
+
+}catch(e){
+
+alert(e.message);
+
+}
+
+}
+
+
+/* =====================================================
+CAMERA
+===================================================== */
+
+let cameraStream=null;
+
+async function openCamera(){
+
+document.getElementById("attachMenu")
+.classList.add("hidden");
+
+try{
+
+cameraStream=
+await navigator.mediaDevices
+.getUserMedia({
+video:true,
+audio:true
+});
+
+const video=
+document.getElementById("cameraVideo");
+
+video.srcObject=cameraStream;
+
+document.getElementById("camera")
+.style.display="flex";
+
+}catch(e){
+
+alert("Kamera açılamadı: "+e.message);
+
+}
+
+}
+
+
+function closeCamera(){
+
+if(cameraStream){
+
+cameraStream.getTracks()
+.forEach(t=>t.stop());
+
+cameraStream=null;
+
+}
+
+document.getElementById("camera")
+.style.display="none";
+
+}
+
+
+function takePicture(){
+
+if(!cameraStream)return;
+
+const video=
+document.getElementById("cameraVideo");
+
+const canvas=
+document.createElement("canvas");
+
+canvas.width=video.videoWidth;
+canvas.height=video.videoHeight;
+
+canvas.getContext("2d")
+.drawImage(video,0,0);
+
+canvas.toBlob(async blob=>{
+
+const file=
+new File(
+[blob],
+"kamera-"+Date.now()+".jpg",
+{type:"image/jpeg"}
+);
+
+closeCamera();
+
+await uploadFile(file);
+
+},"image/jpeg",.92);
+
+}
+
+
+/* =====================================================
+BACKGROUND
+===================================================== */
+
+function chatSettings(){
+
+document.getElementById("settings")
+.classList.toggle("hidden");
+
+}
+
+function openBackgrounds(){
+
+document.getElementById("backgrounds")
+.classList.toggle("hidden");
+
+}
+
+
+function setBackground(bg){
+
+if(!selected)return;
+
+localStorage.setItem(
+"doruk_bg_"+selected.data.id,
+bg
+);
+
+applyBackground();
+
+}
+
+
+function applyBackground(){
+
+if(!selected||selected.type!=="user")return;
+
+const bg=
+localStorage.getItem(
+"doruk_bg_"+selected.data.id
+);
+
+const box=
+document.getElementById("messages");
+
+if(bg){
+
+box.style.background=bg;
+box.style.backgroundImage="none";
+
+}else{
+
+box.style.backgroundColor="#efeae2";
+
+box.style.backgroundImage=
+"radial-gradient(circle at 15px 15px,rgba(0,0,0,.035) 1.5px,transparent 1.5px),radial-gradient(circle at 30px 30px,rgba(0,0,0,.025) 1px,transparent 1px)";
+
+}
+
+}
+
+
+/* =====================================================
+GROUP CREATION
+===================================================== */
+
+async function createGroup(){
+
+const name=
+prompt("Grup adı:");
+
+if(!name||!name.trim())return;
+
+const {data,error}=
+await db.from("groups")
+.insert({
+name:name.trim(),
+owner_id:user.id
+})
+.select()
+.single();
+
+if(error){
+
+alert(
+"Grup oluşturulamadı: "+error.message
+);
+
+return;
+
+}
+
+await db.from("group_members").insert({
+
+group_id:data.id,
+user_id:user.id
+
+});
+
+await loadUsers();
+
+alert("Grup oluşturuldu.");
+
+}
+
+
+/* =====================================================
+OPEN GROUP
+===================================================== */
+
+async function openGroup(id){
+
+const g=
+groups.find(x=>x.id===id);
+
+if(!g)return;
+
+selected={
+type:"group",
+data:g
+};
+
+document.getElementById("app")
+.classList.add("chat-open");
+
+document.getElementById("welcome")
+.classList.add("hidden");
+
+document.getElementById("header")
+.style.display="flex";
+
+document.getElementById("messages")
+.classList.remove("hidden");
+
+document.getElementById("composer")
+.style.display="flex";
+
+document.getElementById("header-name")
+.innerHTML=
+`${escapeHtml(g.name)}
+<div id="header-status">Grup</div>`;
+
+document.getElementById("headerAvatar")
+.innerHTML="👥";
+
+await loadGroupMessages();
+
+}
+
+
+async function loadGroupMessages(){
+
+/*
+Grup mesajları için group_messages tablosu kullanılır.
+*/
+
+const {data,error}=
+await db.from("group_messages")
+.select("*")
+.eq("group_id",selected.data.id)
+.order("created_at");
+
+if(error){
+
+console.error(error);
+return;
+
+}
+
+renderMessages(data||[]);
+
+}
+
+
+/* =====================================================
+CALL SYSTEM
+===================================================== */
+
+const rtcConfig={
+iceServers:[
+{urls:"stun:stun.l.google.com:19302"},
+{urls:"stun:stun1.l.google.com:19302"}
+]
+};
+
+
+function setupCalls(){
+
+callChannel=
+db.channel("dorukcall-calls")
+
+.on(
+"broadcast",
+{event:"offer"},
+async({payload})=>{
+
+if(payload.to!==user.id)return;
+
+incomingOffer=payload.offer;
+incomingCaller=payload.from;
+incomingVideo=payload.video;
+
+const p=
+users.find(x=>x.id===payload.from);
+
+document.getElementById("incomingUser")
+.textContent=
+p?.username||"Gelen arama";
+
+document.getElementById("incomingType")
+.textContent=
+payload.video?
+"Görüntülü arama":
+"Sesli arama";
+
+document.getElementById("incoming")
+.style.display="block";
+
+}
+)
+
+.on(
+"broadcast",
+{event:"answer"},
+async({payload})=>{
+
+if(payload.to!==user.id)return;
+
+if(peer){
+
+await peer.setRemoteDescription(
+new RTCSessionDescription(payload.answer)
+);
+
+document.getElementById("callStatus")
+.textContent="Bağlandı";
+
+}
+
+}
+)
+
+.on(
+"broadcast",
+{event:"ice"},
+async({payload})=>{
+
+if(payload.to!==user.id)return;
+
+if(peer&&payload.candidate){
+
+try{
+
+await peer.addIceCandidate(
+new RTCIceCandidate(payload.candidate)
+);
+
+}catch(e){}
+
+}
+
+}
+)
+
+.on(
+"broadcast",
+{event:"hangup"},
+({payload})=>{
+
+if(payload.to===user.id)
+endCall(false);
+
+}
+)
+
+.subscribe();
+
+}
+
+
+async function createPeer(target){
+
+peer=
+new RTCPeerConnection(rtcConfig);
+
+remoteStream=new MediaStream();
+
+document.getElementById("remote")
+.srcObject=remoteStream;
+
+peer.ontrack=e=>{
+
+e.streams[0]
+.getTracks()
+.forEach(t=>remoteStream.addTrack(t));
+
+};
+
+peer.onicecandidate=async e=>{
+
+if(!e.candidate)return;
+
+await callChannel.send({
+
+type:"broadcast",
+event:"ice",
+
+payload:{
+to:target,
+from:user.id,
+candidate:e.candidate
+}
+
+});
+
+};
+
+}
+
+
+async function callSelected(video){
+
+if(!selected||selected.type!=="user")return;
+
+try{
+
+localStream=
+await navigator.mediaDevices
+.getUserMedia({
+audio:true,
+video
+});
+
+document.getElementById("call")
+.style.display="flex";
+
+document.getElementById("callName")
+.textContent=
+selected.data.username;
+
+document.getElementById("local")
+.srcObject=localStream;
+
+document.getElementById("local")
+.style.display=
+video?"block":"none";
+
+document.getElementById("cameraCallButton")
+.style.display=
+video?"block":"none";
+
+await createPeer(selected.data.id);
+
+localStream.getTracks()
+.forEach(t=>peer.addTrack(t,localStream));
+
+const offer=
+await peer.createOffer();
+
+await peer.setLocalDescription(offer);
+
+await callChannel.send({
+
+type:"broadcast",
+event:"offer",
+
+payload:{
+to:selected.data.id,
+from:user.id,
+offer,
+video
+}
+
+});
+
+}catch(e){
+
+alert(e.message);
+
+endCall(false);
+
+}
+
+}
+
+
+async function answerCall(){
+
+document.getElementById("incoming")
+.style.display="none";
+
+try{
+
+localStream=
+await navigator.mediaDevices
+.getUserMedia({
+audio:true,
+video:incomingVideo
+});
+
+document.getElementById("call")
+.style.display="flex";
+
+const p=
+users.find(x=>x.id===incomingCaller);
+
+document.getElementById("callName")
+.textContent=
+p?.username||"Arama";
+
+document.getElementById("local")
+.srcObject=localStream;
+
+document.getElementById("local")
+.style.display=
+incomingVideo?"block":"none";
+
+document.getElementById("cameraCallButton")
+.style.display=
+incomingVideo?"block":"none";
+
+await createPeer(incomingCaller);
+
+localStream.getTracks()
+.forEach(t=>peer.addTrack(t,localStream));
+
+await peer.setRemoteDescription(
+new RTCSessionDescription(incomingOffer)
+);
+
+const answer=
+await peer.createAnswer();
+
+await peer.setLocalDescription(answer);
+
+await callChannel.send({
+
+type:"broadcast",
+event:"answer",
+
+payload:{
+to:incomingCaller,
+from:user.id,
+answer
+}
+
+});
+
+incomingOffer=null;
+incomingCaller=null;
+
+document.getElementById("callStatus")
+.textContent="Bağlandı";
+
+}catch(e){
+
+alert(e.message);
+
+endCall(false);
+
+}
+
+}
+
+
+async function rejectCall(){
+
+if(incomingCaller){
+
+await callChannel.send({
+
+type:"broadcast",
+event:"hangup",
+
+payload:{
+to:incomingCaller,
+from:user.id
+}
+
+});
+
+}
+
+incomingOffer=null;
+incomingCaller=null;
+
+document.getElementById("incoming")
+.style.display="none";
+
+}
+
+
+function toggleMic(){
+
+if(!localStream)return;
+
+const t=
+localStream.getAudioTracks()[0];
+
+if(t)t.enabled=!t.enabled;
+
+}
+
+
+function toggleCamera(){
+
+if(!localStream)return;
+
+const t=
+localStream.getVideoTracks()[0];
+
+if(t)t.enabled=!t.enabled;
+
+}
+
+
+async function endCall(send=true){
+
+if(send&&selected?.type==="user"){
+
+await callChannel.send({
+
+type:"broadcast",
+event:"hangup",
+
+payload:{
+to:selected.data.id,
+from:user.id
+}
+
+});
+
+}
+
+if(localStream){
+
+localStream.getTracks()
+.forEach(t=>t.stop());
+
+localStream=null;
+
+}
+
+if(remoteStream){
+
+remoteStream.getTracks()
+.forEach(t=>t.stop());
+
+remoteStream=null;
+
+}
+
+if(peer){
+
+peer.close();
+peer=null;
+
+}
+
+document.getElementById("call")
+.style.display="none";
+
+}
+
+
+/* =====================================================
+OTHER
+===================================================== */
+
+function toggleAttach(){
+
+document.getElementById("attachMenu")
+.classList.toggle("hidden");
+
+}
+
+function closeChat(){
+
+document.getElementById("app")
+.classList.remove("chat-open");
+
+}
+
+async function logout(){
+
+await db.auth.signOut();
+
+location.reload();
+
+}
+
+function clean(x){
+
+return x.replace(
+/[^a-zA-Z0-9._-]/g,
+"_"
+);
+
+}
+
+function escapeHtml(x){
+
+return String(x??"")
+.replaceAll("&","&amp;")
+.replaceAll("<","&lt;")
+.replaceAll(">","&gt;")
+.replaceAll('"',"&quot;")
+.replaceAll("'","&#039;");
+
+}
+
+</script>
+
+</body>
+</html>
